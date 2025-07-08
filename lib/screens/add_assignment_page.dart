@@ -1,4 +1,3 @@
-// lib/screens/add_assignment_page.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +19,13 @@ class _AddAssignmentPageState extends State<AddAssignmentPage> {
   DateTime? _dueDate;
   String? _selectedCourseId;
 
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
   Future<void> _selectDueDate(BuildContext context) async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -27,17 +33,10 @@ class _AddAssignmentPageState extends State<AddAssignmentPage> {
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
-    
+
     if (pickedDate != null) {
       setState(() => _dueDate = pickedDate);
     }
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descController.dispose();
-    super.dispose();
   }
 
   @override
@@ -53,27 +52,34 @@ class _AddAssignmentPageState extends State<AddAssignmentPage> {
           child: Column(
             children: [
               DropdownButtonFormField<String>(
-                value: _selectedCourseId,
+                value: (courses.any((c) => c.id == _selectedCourseId))
+                    ? _selectedCourseId
+                    : null,
                 hint: const Text('Select Course'),
-                items: courses.map((course) => DropdownMenuItem(
-                  value: course.id,
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: course.color,
-                          shape: BoxShape.circle,
+                items: courses.map((course) {
+                  return DropdownMenuItem<String>(
+                    value: course.id,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: course.color,
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(course.name),
-                    ],
-                  ),
-                )).toList(),
-                onChanged: (value) => setState(() => _selectedCourseId = value),
-                validator: (value) => value == null ? 'Select a course' : null,
+                        const SizedBox(width: 8),
+                        Text(course.name),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() => _selectedCourseId = value);
+                },
+                validator: (value) =>
+                    value == null ? 'Please select a course' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -82,7 +88,8 @@ class _AddAssignmentPageState extends State<AddAssignmentPage> {
                   labelText: 'Assignment Title',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -101,6 +108,7 @@ class _AddAssignmentPageState extends State<AddAssignmentPage> {
                         ? 'No due date selected'
                         : 'Due: ${DateFormat('MMM dd, yyyy').format(_dueDate!)}',
                   ),
+                  const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => _selectDueDate(context),
                     child: const Text('Select Date'),
@@ -110,7 +118,9 @@ class _AddAssignmentPageState extends State<AddAssignmentPage> {
               const Spacer(),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate() && _dueDate != null) {
+                  if (_formKey.currentState!.validate() &&
+                      _dueDate != null &&
+                      _selectedCourseId != null) {
                     final assignment = Assignment(
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
                       courseId: _selectedCourseId!,
@@ -118,11 +128,17 @@ class _AddAssignmentPageState extends State<AddAssignmentPage> {
                       description: _descController.text,
                       dueDate: _dueDate!,
                     );
-                    
+
                     Provider.of<CoursesProvider>(context, listen: false)
                         .addAssignment(assignment);
-                    
+
                     Navigator.pop(context);
+                  } else if (_dueDate == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please select a due date'),
+                      ),
+                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(

@@ -5,9 +5,11 @@ class NotificationsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
-      body: const Center(child: Text('Notification settings will appear here')),
+    return const Center(
+      child: Text(
+        'Notification settings will appear here',
+        style: TextStyle(fontSize: 16),
+      ),
     );
   }
 }

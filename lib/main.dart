@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:duetrack/providers/courses_provider.dart';
-import 'package:duetrack/screens/courses_page.dart';
+import 'package:duetrack/providers/theme_provider.dart'; // ⬅️ NEW
 import 'package:duetrack/screens/assignments_due_page.dart';
+import 'package:duetrack/screens/courses_page.dart';
 import 'package:duetrack/screens/calendar_page.dart';
 import 'package:duetrack/screens/notifications_page.dart';
 import 'package:duetrack/screens/profile_page.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Initialize notifications
+
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-      
+
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
-      
+
   final InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
   );
-  
+
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   runApp(const MyApp());
@@ -33,16 +32,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => CoursesProvider(),
-      child: MaterialApp(
-        title: 'DueTrack',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        home: const MainNavigationPage(),
-        debugShowCheckedModeBanner: false,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CoursesProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()), // ⬅️ NEW
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'DueTrack',
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(),
+            themeMode: themeProvider.currentTheme,
+            home: const MainNavigationPage(),
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
     );
   }
@@ -59,11 +64,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const AssignmentsDuePage(),  // Home - Shows due assignments
-    const CoursesPage(),         // Courses page
-    const CalendarPage(),        // Calendar page
-    const NotificationsPage(),   // Notifications
-    const ProfilePage(),         // Profile/Settings
+    const AssignmentsDuePage(),
+    const CoursesPage(),
+    const CalendarPage(),
+    const NotificationsPage(),
+    const ProfilePage(),
   ];
 
   @override

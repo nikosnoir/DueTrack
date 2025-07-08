@@ -49,7 +49,8 @@ class _AddCoursePageState extends State<AddCoursePage> {
                   labelText: 'Course Name',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) => value?.isEmpty ?? true ? 'Required' : null,
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -58,19 +59,22 @@ class _AddCoursePageState extends State<AddCoursePage> {
                   labelText: 'Description (Optional)',
                   border: OutlineInputBorder(),
                 ),
-                maxLines: 3,
+                maxLines: 2,
               ),
               const SizedBox(height: 16),
-              const Text('Select Color:'),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Select Color:'),
+              ),
               Wrap(
-                spacing: 8,
+                spacing: 10,
                 children: _colorOptions.map((color) {
                   return ChoiceChip(
-                    label: const Text(''),
+                    label: const Text(""),
                     selected: _selectedColor == color,
                     onSelected: (_) => setState(() => _selectedColor = color),
-                    backgroundColor: color,
                     selectedColor: color,
+                    backgroundColor: color.withOpacity(0.5),
                   );
                 }).toList(),
               ),
@@ -78,15 +82,13 @@ class _AddCoursePageState extends State<AddCoursePage> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    final newCourse = Course(
+                    final newCourse = Course.create(
                       name: _nameController.text,
                       description: _descController.text,
                       color: _selectedColor,
                     );
-                    
                     Provider.of<CoursesProvider>(context, listen: false)
                         .addCourse(newCourse);
-                    
                     Navigator.pop(context);
                   }
                 },
