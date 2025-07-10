@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:duetrack/providers/courses_provider.dart';
-import 'package:duetrack/providers/theme_provider.dart'; // ⬅️ NEW
+import 'package:duetrack/providers/theme_provider.dart'; 
 import 'package:duetrack/screens/assignments_due_page.dart';
 import 'package:duetrack/screens/courses_page.dart';
 import 'package:duetrack/screens/calendar_page.dart';
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CoursesProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()), // ⬅️ NEW
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
