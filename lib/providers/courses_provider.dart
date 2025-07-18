@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
 import '../models/course.dart';
 import '../models/assignment.dart';
+import '../database_helper.dart';
 
 class CoursesProvider with ChangeNotifier {
   final List<Course> _courses = [];
   final List<Assignment> _assignments = [];
+  final DatabaseHelper _dbHelper = DatabaseHelper();
 
   List<Course> get courses => [..._courses];
   List<Assignment> get assignments => [..._assignments];
 
-  void addCourse(Course course) {
+  /// Load courses and assignments from the database
+  Future<void> loadData() async {
+    _courses.clear();
+    _assignments.clear();
+    _courses.addAll(await _dbHelper.getAllCourses());
+    _assignments.addAll(await _dbHelper.getAllAssignments());
+    notifyListeners();
+  }
+
+  Future<void> addCourse(Course course) async {
+    await _dbHelper.insertCourse(course);
     _courses.add(course);
     notifyListeners();
   }
 
-  void addAssignment(Assignment assignment) {
+  Future<void> addAssignment(Assignment assignment) async {
+    await _dbHelper.insertAssignment(assignment);
     _assignments.add(assignment);
     notifyListeners();
   }
@@ -23,19 +36,29 @@ class CoursesProvider with ChangeNotifier {
     return _assignments.where((a) => a.courseId == courseId).toList();
   }
 
-  void removeCourse(String courseId) {
+  Future<void> updateCourse(Course updatedCourse) async {
+    await _dbHelper.updateCourse(updatedCourse);
+    final index = _courses.indexWhere((c) => c.id == updatedCourse.id);
+    if (index != -1) {
+      _courses[index] = updatedCourse;
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeCourse(String courseId) async {
+    await _dbHelper.deleteCourse(courseId);
+    await _dbHelper.deleteAssignmentsByCourse(courseId);
     _courses.removeWhere((c) => c.id == courseId);
     _assignments.removeWhere((a) => a.courseId == courseId);
     notifyListeners();
   }
 
-  /// ✅ Used by ProfilePage
   List<Assignment> getAllAssignments() {
     return [..._assignments];
   }
 
-  /// ✅ Used by AssignmentDetailPage or swipe to update status/title/etc
-  void updateAssignment(Assignment updated) {
+  Future<void> updateAssignment(Assignment updated) async {
+    await _dbHelper.updateAssignment(updated);
     final index = _assignments.indexWhere((a) => a.id == updated.id);
     if (index != -1) {
       _assignments[index] = updated;
@@ -43,19 +66,18 @@ class CoursesProvider with ChangeNotifier {
     }
   }
 
-  /// ✅ Alternative: Update by fields (optional helper)
-  void updateAssignmentByFields(
+  Future<void> updateAssignmentByFields(
     String id, {
     String? title,
     String? description,
     DateTime? dueDate,
     TaskPriority? priority,
     TaskStatus? status,
-  }) {
+  }) async {
     final index = _assignments.indexWhere((a) => a.id == id);
     if (index != -1) {
       final old = _assignments[index];
-      _assignments[index] = Assignment(
+      final updated = Assignment(
         id: old.id,
         courseId: old.courseId,
         title: title ?? old.title,
@@ -64,6 +86,8 @@ class CoursesProvider with ChangeNotifier {
         priority: priority ?? old.priority,
         status: status ?? old.status,
       );
+      await _dbHelper.updateAssignment(updated);
+      _assignments[index] = updated;
       notifyListeners();
     }
   }

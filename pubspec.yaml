@@ -21,6 +21,10 @@ dependencies:
   timezone: ^0.9.2           # For timezone support
   uuid: ^3.0.7               # For generating unique IDs
   percent_indicator: ^4.2.2
+  sqflite: ^2.3.2
+  path_provider: ^2.1.2
+  path: ^1.8.3
+  shared_preferences: ^2.2.2
 
 
 dev_dependencies:

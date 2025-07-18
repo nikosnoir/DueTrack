@@ -1,4 +1,4 @@
-// lib/screens/add_course_page.dart
+import '../database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/course.dart';
@@ -80,15 +80,21 @@ class _AddCoursePageState extends State<AddCoursePage> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     final newCourse = Course.create(
                       name: _nameController.text,
                       description: _descController.text,
                       color: _selectedColor,
                     );
+
+                    // Save to SQLite
+                    await DatabaseHelper().insertCourse(newCourse);
+
+                    // Update in Provider
                     Provider.of<CoursesProvider>(context, listen: false)
                         .addCourse(newCourse);
+
                     Navigator.pop(context);
                   }
                 },

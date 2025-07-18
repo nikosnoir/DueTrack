@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/course.dart';
-import '../models/assignment.dart';
 import '../providers/courses_provider.dart';
 import '../screens/add_assignment_page.dart'; 
 

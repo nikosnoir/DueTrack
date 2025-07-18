@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/assignment.dart';
-import '../models/course.dart';
 import '../providers/courses_provider.dart';
 
 class AddAssignmentPage extends StatefulWidget {

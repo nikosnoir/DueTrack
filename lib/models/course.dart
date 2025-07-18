@@ -29,6 +29,21 @@ class Course {
     );
   }
 
+  /// Copy with new values
+  Course copyWith({
+    String? id,
+    String? name,
+    Color? color,
+    String? description,
+  }) {
+    return Course(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      description: description ?? this.description,
+    );
+  }
+
   /// Convert to map for storage
   Map<String, dynamic> toMap() => {
         'id': id,
